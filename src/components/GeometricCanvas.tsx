@@ -1,4 +1,3 @@
-// src/components/GeometricCanvas.tsx
 import { useRef, useEffect } from 'react';
 
 export const GeometricCanvas = () => {
@@ -26,7 +25,7 @@ export const GeometricCanvas = () => {
     };
 
     const draw = (w: number, h: number) => {
-      // 完全に消さず、薄い黒で上塗りして「残像」を作る
+      // 完全に消さず、薄い黒で上塗りして残像を作る
       ctx.fillStyle = 'rgba(26, 26, 26, 0.05)';
       ctx.fillRect(0, 0, w, h);
 
@@ -46,7 +45,7 @@ export const GeometricCanvas = () => {
         const angle = (i / points) * Math.PI * 2;
 
         // 波の式に時間を足して、うねりを動かす
-        const radius = 150 + Math.sin(angle * 5 + time * 3) * 50;
+        const radius = 150 + Math.sin(angle * 20 + time * 3) * 50;
 
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
@@ -62,7 +61,7 @@ export const GeometricCanvas = () => {
 
     const render = () => {
       const { innerWidth, innerHeight } = window;
-      time += 0.01; // フレームごとに時間を進める
+      time += 0.1; // フレームごとに時間を進める
       draw(innerWidth, innerHeight);
       animationFrameId = requestAnimationFrame(render);
     };
