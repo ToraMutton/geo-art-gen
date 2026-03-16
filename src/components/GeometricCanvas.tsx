@@ -1,23 +1,22 @@
+// src/components/GeometricCanvas.tsx
 import { useRef, useEffect } from 'react';
 import { useControls, button } from 'leva';
 
 export const GeometricCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // コントロールパネルのパラメータ定義
   const params = useControls('Geometry Settings', {
-    points: { value: 200, min: 10, max: 1000, step: 1, label: '頂点数' },
+    mode: { options: ['Wave', 'Chaos', 'Star'], label: 'アルゴリズム' },
+    points: { value: 200, min: 10, max: 2000, step: 1, label: '頂点数' },
     waves: { value: 20, min: 1, max: 50, step: 1, label: '波の数' },
-    waveHeight: { value: 50, min: 0, max: 200, step: 1, label: '振幅' },
-    baseRadius: { value: 150, min: 10, max: 500, step: 1, label: '基本半径' },
+    waveHeight: { value: 50, min: 0, max: 500, step: 1, label: '振幅' },
+    baseRadius: { value: 150, min: 10, max: 800, step: 1, label: '基本半径' },
     rotationSpeed: { value: 0.2, min: -2, max: 2, step: 0.1, label: '回転速度' },
     waveSpeed: { value: 3, min: -10, max: 10, step: 0.1, label: '波の速度' },
     fadeOpacity: { value: 0.05, min: 0.01, max: 0.5, step: 0.01, label: '残像の濃さ' },
-
     '画像を保存': button(() => {
       const canvas = document.querySelector('canvas');
       if (!canvas) return;
-
       const link = document.createElement('a');
       link.download = `art.png`;
       link.href = canvas.toDataURL('image/png');
@@ -58,7 +57,16 @@ export const GeometricCanvas = () => {
 
       for (let i = 0; i <= params.points; i++) {
         const angle = (i / params.points) * Math.PI * 2;
-        const radius = params.baseRadius + Math.sin(angle * params.waves + time * params.waveSpeed) * params.waveHeight;
+        let radius = params.baseRadius;
+
+        // 選択されたアルゴリズムで半径を計算
+        if (params.mode === 'Wave') {
+          radius += Math.sin(angle * params.waves + time * params.waveSpeed) * params.waveHeight;
+        } else if (params.mode === 'Chaos') {
+          radius += Math.tan(angle * params.waves + time * params.waveSpeed) * params.waveHeight;
+        } else if (params.mode === 'Star') {
+          radius += (i % 2 === 0 ? params.waveHeight : -params.waveHeight) * Math.sin(time);
+        }
 
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
