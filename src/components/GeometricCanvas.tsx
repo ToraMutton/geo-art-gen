@@ -1,6 +1,5 @@
-// src/components/GeometricCanvas.tsx
 import { useRef, useEffect } from 'react';
-import { useControls } from 'leva';
+import { useControls, button } from 'leva';
 
 export const GeometricCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,6 +13,16 @@ export const GeometricCanvas = () => {
     rotationSpeed: { value: 0.2, min: -2, max: 2, step: 0.1, label: '回転速度' },
     waveSpeed: { value: 3, min: -10, max: 10, step: 0.1, label: '波の速度' },
     fadeOpacity: { value: 0.05, min: 0.01, max: 0.5, step: 0.01, label: '残像の濃さ' },
+
+    '画像を保存': button(() => {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+
+      const link = document.createElement('a');
+      link.download = `art.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }),
   });
 
   useEffect(() => {
