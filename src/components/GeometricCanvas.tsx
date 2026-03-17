@@ -11,10 +11,19 @@ type Params = {
   rotationSpeed: number;
   waveSpeed: number;
   fadeOpacity: number;
+  resolution: keyof typeof RESOLUTIONS;
+};
+
+// 解像度の定義
+const RESOLUTIONS = {
+  'FHD (1080p)': { w: 1920, h: 1080 },
+  'WQHD (1440p)': { w: 2560, h: 1440 },
+  '4K (2160p)': { w: 3840, h: 2160 },
 };
 
 export const GeometricCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const timeRef = useRef(0); // アニメーションの時間を保持
 
   // 状態管理
   const [params, setParams] = useState<Params>({
@@ -26,13 +35,91 @@ export const GeometricCanvas = () => {
     rotationSpeed: -0.5,
     waveSpeed: -6.6,
     fadeOpacity: 0.22,
+    resolution: 'FHD (1080p)',
   });
 
-  // アニメーションループ内で最新のparamsを参照するためのRef
   const paramsRef = useRef(params);
   useEffect(() => {
     paramsRef.current = params;
   }, [params]);
+
+  // 描画ロジック（画面用とダウンロード用で使い回すため分離）
+  const drawPath = (ctx: CanvasRenderingContext2D, w: number, h: number, currentParams: Params, time: number) => {
+    ctx.fillStyle = `rgba(26, 26, 26, ${currentParams.fadeOpacity})`;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(time * currentParams.rotationSpeed);
+
+    ctx.beginPath();
+    // 色も時間経過で変わるように
+    ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`;
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i <= currentParams.points; i++) {
+      const angle = (i / currentParams.points) * Math.PI * 2;
+      let radius = currentParams.baseRadius;
+      let x = 0;
+      let y = 0;
+      const t = time * currentParams.waveSpeed;
+
+      // 怒涛の10種類のアルゴリズム！
+      switch (currentParams.mode) {
+        case 'Wave': // サイン波
+          radius += Math.sin(angle * currentParams.waves + t) * currentParams.waveHeight;
+          break;
+        case 'Chaos': // タンジェント
+          radius += Math.tan(angle * currentParams.waves + t) * currentParams.waveHeight;
+          break;
+        case 'Star': // 星型
+          radius += (i % 2 === 0 ? currentParams.waveHeight : -currentParams.waveHeight) * Math.sin(time);
+          break;
+        case 'Rose': // バラ曲線
+          radius = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t * 0.5);
+          break;
+        case 'Spirograph': // スピログラフ風
+          radius += currentParams.waveHeight * Math.cos(angle * (currentParams.waves * 2.5) + t);
+          break;
+        case 'Polygon': // 多角形風（カクカクする）
+          const sides = Math.max(3, currentParams.waves);
+          const a = Math.PI / sides;
+          radius = currentParams.baseRadius / Math.cos(a - (angle % (2 * a))) + Math.sin(t) * 20;
+          break;
+        case 'Butterfly': // 蝶の羽模様
+          radius = currentParams.baseRadius * (Math.pow(Math.E, Math.cos(angle)) - 2 * Math.cos(4 * angle) + Math.pow(Math.sin(angle / 12), 5)) * 0.3;
+          break;
+        case 'Lissajous': // リサジュー図形
+          x = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t);
+          y = currentParams.baseRadius * Math.sin((currentParams.waves + 1) * angle);
+          break; // xとyを直接計算したのでここでbreak
+        case 'Web': // クモの巣
+          radius += (i % Math.max(1, currentParams.waves) === 0 ? currentParams.waveHeight : 0) * Math.cos(t);
+          break;
+        case 'Heart': // ハート型（数式ベース）
+          const r = currentParams.baseRadius * 0.1;
+          x = r * 16 * Math.pow(Math.sin(angle), 3);
+          y = -r * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+          // 波のエッセンスを加える
+          x += Math.sin(t) * currentParams.waveHeight * 0.1;
+          y += Math.cos(t) * currentParams.waveHeight * 0.1;
+          break;
+      }
+
+      // LissajousとHeart以外は通常の極座標からXYを計算
+      if (currentParams.mode !== 'Lissajous' && currentParams.mode !== 'Heart') {
+        x = Math.cos(angle) * radius;
+        y = Math.sin(angle) * radius;
+      }
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -41,7 +128,6 @@ export const GeometricCanvas = () => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let time = 0;
 
     const resizeCanvas = () => {
       const { innerWidth, innerHeight } = window;
@@ -51,56 +137,20 @@ export const GeometricCanvas = () => {
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.scale(dpr, dpr);
-    };
 
-    const draw = (w: number, h: number) => {
-      const currentParams = paramsRef.current; // 最新のパラメータを取得
-
-      ctx.fillStyle = `rgba(26, 26, 26, ${currentParams.fadeOpacity})`;
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      ctx.rotate(time * currentParams.rotationSpeed);
-
-      ctx.beginPath();
-      ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`;
-      ctx.lineWidth = 2;
-
-      for (let i = 0; i <= currentParams.points; i++) {
-        const angle = (i / currentParams.points) * Math.PI * 2;
-        let radius = currentParams.baseRadius;
-
-        if (currentParams.mode === 'Wave') {
-          radius += Math.sin(angle * currentParams.waves + time * currentParams.waveSpeed) * currentParams.waveHeight;
-        } else if (currentParams.mode === 'Chaos') {
-          radius += Math.tan(angle * currentParams.waves + time * currentParams.waveSpeed) * currentParams.waveHeight;
-        } else if (currentParams.mode === 'Star') {
-          radius += (i % 2 === 0 ? currentParams.waveHeight : -currentParams.waveHeight) * Math.sin(time);
-        }
-
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-
-      ctx.closePath();
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const render = () => {
-      time += 0.01;
-      draw(window.innerWidth, window.innerHeight);
-      animationFrameId = requestAnimationFrame(render);
+      // リサイズ時に背景を一度黒く塗りつぶす
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     };
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+    const render = () => {
+      timeRef.current += 0.01;
+      drawPath(ctx, window.innerWidth, window.innerHeight, paramsRef.current, timeRef.current);
+      animationFrameId = requestAnimationFrame(render);
+    };
 
     render();
 
@@ -110,17 +160,35 @@ export const GeometricCanvas = () => {
     };
   }, []);
 
-  // パラメータ更新用のヘルパー関数
-  const updateParam = (key: keyof Params, value: number | string) => {
+  const updateParam = (key: keyof Params, value: any) => {
     setParams(prev => ({ ...prev, [key]: value }));
   };
 
   const handleDownload = () => {
-    const canvas = document.querySelector('canvas');
-    if (!canvas) return;
+    const { w, h } = RESOLUTIONS[params.resolution];
+
+    // オフスクリーンキャンバス（裏口の透明なキャンバス）を作成
+    const offscreen = document.createElement('canvas');
+    offscreen.width = w;
+    offscreen.height = h;
+    const oCtx = offscreen.getContext('2d');
+    if (!oCtx) return;
+
+    // ベースの背景色を塗る
+    oCtx.fillStyle = '#1a1a1a';
+    oCtx.fillRect(0, 0, w, h);
+
+    // 残像（軌跡）を再現するために、過去60フレーム分を高速でシミュレーション描画する
+    const framesToSimulate = 60;
+    for (let i = framesToSimulate; i >= 0; i--) {
+      const simTime = timeRef.current - (i * 0.01);
+      drawPath(oCtx, w, h, params, simTime);
+    }
+
+    // 画像化してダウンロード
     const link = document.createElement('a');
-    link.download = `toramatsu-art-${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.download = `toramatsu-art-${params.resolution.split(' ')[0]}-${Date.now()}.png`;
+    link.href = offscreen.toDataURL('image/png');
     link.click();
   };
 
@@ -132,11 +200,11 @@ export const GeometricCanvas = () => {
       />
 
       {/* Modrinth風UIパネル */}
-      <div className="fixed top-4 right-4 z-10 w-80 p-5 bg-[#1e1e1e] border border-[#2d2d2d] rounded shadow-2xl font-sans text-sm">
+      <div className="fixed top-4 right-4 z-10 w-80 p-5 bg-[#1e1e1e] border border-[#2d2d2d] rounded shadow-2xl font-sans text-sm h-max max-h-[90vh] overflow-y-auto custom-scrollbar">
         <h2 className="mb-4 text-lg font-bold text-gray-200">Geometry Settings</h2>
 
         <div className="mb-4">
-          <label className="block mb-1 text-gray-400">アルゴリズム</label>
+          <label className="block mb-1 text-gray-400">アルゴリズム (10種)</label>
           <select
             value={params.mode}
             onChange={(e) => updateParam('mode', e.target.value)}
@@ -145,22 +213,42 @@ export const GeometricCanvas = () => {
             <option value="Wave">Wave (サイン波)</option>
             <option value="Chaos">Chaos (タンジェント)</option>
             <option value="Star">Star (星型)</option>
+            <option value="Rose">Rose (バラ曲線)</option>
+            <option value="Spirograph">Spirograph (トロコイド風)</option>
+            <option value="Polygon">Polygon (多角形)</option>
+            <option value="Butterfly">Butterfly (蝶の羽)</option>
+            <option value="Lissajous">Lissajous (リサジュー)</option>
+            <option value="Web">Web (クモの巣)</option>
+            <option value="Heart">Heart (ハート型)</option>
           </select>
         </div>
 
         <Slider label="頂点数" value={params.points} min={10} max={2000} step={1} onChange={(v) => updateParam('points', v)} />
-        <Slider label="波の数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
-        <Slider label="振幅" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
-        <Slider label="基本半径" value={params.baseRadius} min={10} max={800} step={1} onChange={(v) => updateParam('baseRadius', v)} />
+        <Slider label="波の数 / 頂点係数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
+        <Slider label="振幅 / 歪み" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
+        <Slider label="基本半径" value={params.baseRadius} min={10} max={1500} step={1} onChange={(v) => updateParam('baseRadius', v)} />
         <Slider label="回転速度" value={params.rotationSpeed} min={-2} max={2} step={0.1} onChange={(v) => updateParam('rotationSpeed', v)} />
-        <Slider label="波の速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
+        <Slider label="時間変化速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
         <Slider label="残像の濃さ" value={params.fadeOpacity} min={0.01} max={0.5} step={0.01} onChange={(v) => updateParam('fadeOpacity', v)} />
+
+        <div className="mt-6 mb-2 border-t border-[#3d3d3d] pt-4">
+          <label className="block mb-1 text-gray-400">出力サイズ</label>
+          <select
+            value={params.resolution}
+            onChange={(e) => updateParam('resolution', e.target.value)}
+            className="w-full bg-[#2d2d2d] border border-[#3d3d3d] text-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#00b259]"
+          >
+            {Object.keys(RESOLUTIONS).map(res => (
+              <option key={res} value={res}>{res}</option>
+            ))}
+          </select>
+        </div>
 
         <button
           onClick={handleDownload}
-          className="w-full mt-4 px-4 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors"
+          className="w-full mt-2 px-4 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors"
         >
-          画像を保存
+          高画質で保存
         </button>
       </div>
     </>
@@ -170,7 +258,7 @@ export const GeometricCanvas = () => {
 // スライダー用コンポーネント
 const Slider = ({ label, value, min, max, step, onChange }: { label: string, value: number, min: number, max: number, step: number, onChange: (v: number) => void }) => (
   <div className="mb-3">
-    <div className="flex justify-between text-gray-400 mb-1">
+    <div className="flex justify-between text-gray-400 mb-1 text-xs">
       <span>{label}</span>
       <span className="font-mono">{value}</span>
     </div>
