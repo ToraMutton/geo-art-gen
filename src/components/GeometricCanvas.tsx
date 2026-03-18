@@ -21,12 +21,14 @@ const RESOLUTIONS = {
   '4K (2160p)': { w: 3840, h: 2160 },
 };
 
+// ============================================
+
 export const GeometricCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeRef = useRef(0); // アニメーションの時間を保持
 
-  // 状態管理
-  const [params, setParams] = useState<Params>({
+  // 初期状態
+  const [params, setParams] = useState<Params>({ // 分割代入
     mode: 'Chaos',
     points: 890,
     waves: 7,
@@ -38,9 +40,10 @@ export const GeometricCanvas = () => {
     resolution: 'FHD (1080p)',
   });
 
-  const paramsRef = useRef(params);
+  const paramsRef = useRef(params); // 
+
   useEffect(() => {
-    paramsRef.current = params;
+    paramsRef.current = params; // paramsが変わるたびに更新
   }, [params]);
 
   // 描画ロジック（画面用とダウンロード用で使い回すため分離）
@@ -120,6 +123,8 @@ export const GeometricCanvas = () => {
     ctx.stroke();
     ctx.restore();
   };
+
+  // ============================================
 
   useEffect(() => {
     const canvas = canvasRef.current;
