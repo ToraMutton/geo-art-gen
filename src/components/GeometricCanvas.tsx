@@ -60,11 +60,15 @@ export const GeometricCanvas = () => {
     ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`; // 色相変化、彩度と明度は固定
     ctx.lineWidth = 2; // 線の太さ
 
+    // iを0からpoints(頂点数)まで1ずつ増やす
     for (let i = 0; i <= currentParams.points; i++) {
+      // angleが 0 から 2π まで一周
       const angle = (i / currentParams.points) * Math.PI * 2;
-      let radius = currentParams.baseRadius;
+
+      let radius = currentParams.baseRadius; // 基本半径      
       let x = 0;
       let y = 0;
+      // time × 速度の省略
       const t = time * currentParams.waveSpeed;
 
       // 怒涛の10種類のアルゴリズム！
@@ -72,33 +76,42 @@ export const GeometricCanvas = () => {
         case 'Wave': // サイン波
           radius += Math.sin(angle * currentParams.waves + t) * currentParams.waveHeight;
           break;
+
         case 'Chaos': // タンジェント
           radius += Math.tan(angle * currentParams.waves + t) * currentParams.waveHeight;
           break;
+
         case 'Star': // 星型
           radius += (i % 2 === 0 ? currentParams.waveHeight : -currentParams.waveHeight) * Math.sin(time);
           break;
+
         case 'Rose': // バラ曲線
           radius = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t * 0.5);
           break;
+
         case 'Spirograph': // スピログラフ風
           radius += currentParams.waveHeight * Math.cos(angle * (currentParams.waves * 2.5) + t);
           break;
+
         case 'Polygon': // 多角形風（カクカクする）
           const sides = Math.max(3, currentParams.waves);
           const a = Math.PI / sides;
           radius = currentParams.baseRadius / Math.cos(a - (angle % (2 * a))) + Math.sin(t) * 20;
           break;
+
         case 'Butterfly': // 蝶の羽模様
           radius = currentParams.baseRadius * (Math.pow(Math.E, Math.cos(angle)) - 2 * Math.cos(4 * angle) + Math.pow(Math.sin(angle / 12), 5)) * 0.3;
           break;
+
         case 'Lissajous': // リサジュー図形
           x = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t);
           y = currentParams.baseRadius * Math.sin((currentParams.waves + 1) * angle);
           break; // xとyを直接計算したのでここでbreak
+
         case 'Web': // クモの巣
           radius += (i % Math.max(1, currentParams.waves) === 0 ? currentParams.waveHeight : 0) * Math.cos(t);
           break;
+
         case 'Heart': // ハート型（数式ベース）
           const r = currentParams.baseRadius * 0.1;
           x = r * 16 * Math.pow(Math.sin(angle), 3);
