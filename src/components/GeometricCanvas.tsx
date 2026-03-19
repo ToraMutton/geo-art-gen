@@ -48,17 +48,17 @@ export const GeometricCanvas = () => {
 
   // 描画ロジック（画面用とダウンロード用で使い回すため分離）
   const drawPath = (ctx: CanvasRenderingContext2D, w: number, h: number, currentParams: Params, time: number) => {
-    ctx.fillStyle = `rgba(26, 26, 26, ${currentParams.fadeOpacity})`;
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = `rgba(26, 26, 26, ${currentParams.fadeOpacity})`; // 残像効果
+    ctx.fillRect(0, 0, w, h); // キャンバス全体を指定色で塗りつぶす
 
-    ctx.save();
-    ctx.translate(w / 2, h / 2);
-    ctx.rotate(time * currentParams.rotationSpeed);
+    ctx.save(); // 現在の状態を保存
+    ctx.translate(w / 2, h / 2); // 原点を左上(デフォルト)→画面の中心に移動
+    ctx.rotate(time * currentParams.rotationSpeed); // キャンバス全体を回転(経過時間×回転速度)
 
-    ctx.beginPath();
+    ctx.beginPath(); // 新しいパスを開始
     // 色も時間経過で変わるように
-    ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`; // 色相変化、彩度と明度は固定
+    ctx.lineWidth = 2; // 線の太さ
 
     for (let i = 0; i <= currentParams.points; i++) {
       const angle = (i / currentParams.points) * Math.PI * 2;
