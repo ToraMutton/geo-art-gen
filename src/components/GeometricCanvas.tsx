@@ -97,12 +97,16 @@ export const GeometricCanvas = () => {
         case 'Polygon': { // 多角形風（カクカクする）
           const sides = Math.max(3, currentParams.waves);
           const a = Math.PI / sides;
-          radius = currentParams.baseRadius / Math.cos(a - (angle % (2 * a))) + Math.sin(t) * 20;
+          radius = currentParams.baseRadius / Math.cos(a - (angle % (2 * a))) + Math.sin(t) * 20; // a から引くのはゼロ除算回避
           break;
         }
 
         case 'Butterfly': // 蝶の羽模様
-          radius = currentParams.baseRadius * (Math.pow(Math.E, Math.cos(angle)) - 2 * Math.cos(4 * angle) + Math.pow(Math.sin(angle / 12), 5)) * 0.3;
+          radius = currentParams.baseRadius * ( // Roseと同じく完全上書き
+            Math.pow(Math.E, Math.cos(angle)) // 自然体数の底 e の-1~1乗(0.37 ~ 2.71)
+            - 2 * Math.cos(4 * angle)
+            + Math.pow(Math.sin(angle / 12), 5)
+          ) * 0.3;
           break;
 
         case 'Lissajous': // リサジュー図形
@@ -115,7 +119,7 @@ export const GeometricCanvas = () => {
           radius += (i % Math.max(1, currentParams.waves) === 0 ? currentParams.waveHeight : 0) * Math.cos(t);
           break;
 
-        case 'Heart': { // ハート型（数式ベース）
+        case 'Heart': { // ハート型
           const r = currentParams.baseRadius * 0.1;
           x = r * 16 * Math.pow(Math.sin(angle), 3);
           y = -r * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
