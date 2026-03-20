@@ -71,7 +71,7 @@ export const GeometricCanvas = () => {
       // time × 速度の省略
       const t = time * currentParams.waveSpeed;
 
-      // 怒涛の10種類のアルゴリズム！
+      // 10種類の描画アルゴリズム
       switch (currentParams.mode) {
         case 'Wave': // サイン波
           radius += Math.sin(angle * currentParams.waves + t) * currentParams.waveHeight;
@@ -86,24 +86,27 @@ export const GeometricCanvas = () => {
           break;
 
         case 'Rose': // バラ曲線
+          // += ではなく = 、完全に上書き
           radius = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t * 0.5);
           break;
 
-        case 'Spirograph': // スピログラフ風
+        case 'Spirograph': // スピログラフ風(Waveとほぼ同じ)
           radius += currentParams.waveHeight * Math.cos(angle * (currentParams.waves * 2.5) + t);
           break;
 
-        case 'Polygon': // 多角形風（カクカクする）
+        case 'Polygon': { // 多角形風（カクカクする）
           const sides = Math.max(3, currentParams.waves);
           const a = Math.PI / sides;
           radius = currentParams.baseRadius / Math.cos(a - (angle % (2 * a))) + Math.sin(t) * 20;
           break;
+        }
 
         case 'Butterfly': // 蝶の羽模様
           radius = currentParams.baseRadius * (Math.pow(Math.E, Math.cos(angle)) - 2 * Math.cos(4 * angle) + Math.pow(Math.sin(angle / 12), 5)) * 0.3;
           break;
 
         case 'Lissajous': // リサジュー図形
+          // 媒介変数表示
           x = currentParams.baseRadius * Math.sin(currentParams.waves * angle + t);
           y = currentParams.baseRadius * Math.sin((currentParams.waves + 1) * angle);
           break; // xとyを直接計算したのでここでbreak
@@ -112,7 +115,7 @@ export const GeometricCanvas = () => {
           radius += (i % Math.max(1, currentParams.waves) === 0 ? currentParams.waveHeight : 0) * Math.cos(t);
           break;
 
-        case 'Heart': // ハート型（数式ベース）
+        case 'Heart': { // ハート型（数式ベース）
           const r = currentParams.baseRadius * 0.1;
           x = r * 16 * Math.pow(Math.sin(angle), 3);
           y = -r * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
@@ -120,6 +123,7 @@ export const GeometricCanvas = () => {
           x += Math.sin(t) * currentParams.waveHeight * 0.1;
           y += Math.cos(t) * currentParams.waveHeight * 0.1;
           break;
+        }
       }
 
       // LissajousとHeart以外は通常の極座標からXYを計算
