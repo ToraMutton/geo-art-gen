@@ -26,7 +26,7 @@ function App() {
           {/* タイトル */}
           <h1 className="text-2xl font-light tracking-widest text-white"
             style={{ fontFamily: "'Outfit', sans-serif" }}>
-            Artoram
+            ArToram
           </h1>
 
         </div>
