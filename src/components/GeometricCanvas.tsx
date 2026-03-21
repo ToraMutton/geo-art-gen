@@ -148,44 +148,49 @@ export const GeometricCanvas = () => {
 
   // ============================================
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  // アニメーションループ
+  useEffect(
+    () => { // 関数部分
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    let animationFrameId: number;
+      let animationFrameId: number;
 
-    const resizeCanvas = () => {
-      const { innerWidth, innerHeight } = window;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.style.width = `${innerWidth}px`;
-      canvas.style.height = `${innerHeight}px`;
-      canvas.width = innerWidth * dpr;
-      canvas.height = innerHeight * dpr;
-      ctx.scale(dpr, dpr);
+      const resizeCanvas = () => {
+        const { innerWidth, innerHeight } = window;
+        const dpr = window.devicePixelRatio || 1; // Retinaディスプレイ対応
+        canvas.style.width = `${innerWidth}px`;
+        canvas.style.height = `${innerHeight}px`;
+        canvas.width = innerWidth * dpr;
+        canvas.height = innerHeight * dpr;
+        ctx.scale(dpr, dpr);
 
-      // リサイズ時に背景を一度黒く塗りつぶす
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-    };
+        // リサイズ時に背景を一度黒く塗りつぶす
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      };
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
-    const render = () => {
-      timeRef.current += 0.01;
-      drawPath(ctx, window.innerWidth, window.innerHeight, paramsRef.current, timeRef.current);
-      animationFrameId = requestAnimationFrame(render);
-    };
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
 
-    render();
+      const render = () => {
+        timeRef.current += 0.01;
+        drawPath(ctx, window.innerWidth, window.innerHeight, paramsRef.current, timeRef.current);
+        animationFrameId = requestAnimationFrame(render);
+      };
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
+      render();
+
+      return () => {
+        window.removeEventListener('resize', resizeCanvas);
+        cancelAnimationFrame(animationFrameId);
+      };
+    },
+    // 配列部分
+    []);
 
   const updateParam = (key: keyof Params, value: any) => {
     setParams(prev => ({ ...prev, [key]: value }));
