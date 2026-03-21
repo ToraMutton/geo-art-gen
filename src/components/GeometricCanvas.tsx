@@ -44,27 +44,37 @@ export const GeometricCanvas = () => {
   const timeRef = useRef(0); // アニメーションの時間を保持
 
   // 初期状態
-  const [params, setParams] = useState<Params>({ // 分割代入
-    mode: 'Chaos',
-    points: 890,
-    waves: 7,
-    waveHeight: 30,
-    baseRadius: 226,
-    rotationSpeed: -0.5,
-    waveSpeed: -6.6,
-    fadeOpacity: 0.22,
-    resolution: 'FHD (1080p)',
-    bgColor: '#1a1a1a',
-    strokeColor: '#00aaff',
+  const [params, setParams] = useState<Params>(() => {
+    const p = new URLSearchParams(window.location.search);
+    return {
+      mode: p.get('mode') ?? 'Chaos',
+      points: Number(p.get('points') ?? 890),
+      waves: Number(p.get('waves') ?? 7),
+      waveHeight: Number(p.get('waveHeight') ?? 30),
+      baseRadius: Number(p.get('baseRadius') ?? 226),
+      rotationSpeed: Number(p.get('rotationSpeed') ?? -0.5),
+      waveSpeed: Number(p.get('waveSpeed') ?? -6.6),
+      fadeOpacity: Number(p.get('fadeOpacity') ?? 0.22),
+      resolution: (p.get('resolution') ?? 'FHD (1080p)') as keyof typeof RESOLUTIONS,
+      bgColor: p.get('bgColor') ?? '#1a1a1a',
+      strokeColor: p.get('strokeColor') ?? '#00aaff',
+    };
   });
 
   const [isPanelOpen, setIsPanelOpen] = useState(true);
 
   const paramsRef = useRef(params); // 
   useEffect(() => {
-    paramsRef.current = params
-    resizeCanvasRef.current()
-  }, [params])
+    paramsRef.current = params;
+    resizeCanvasRef.current();
+
+    // URLを更新
+    const p = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      p.set(key, String(value));
+    });
+    window.history.replaceState(null, '', `?${p.toString()}`);
+  }, [params]);
   const canvasSizeRef = useRef({ w: window.innerWidth, h: window.innerHeight });
 
   // 描画ロジック（画面用とダウンロード用で使い回すため分離）
