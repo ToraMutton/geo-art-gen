@@ -120,10 +120,10 @@ export const GeometricCanvas = () => {
           break;
 
         case 'Heart': { // ハート型
-          const r = currentParams.baseRadius * 0.1;
+          const r = currentParams.baseRadius * 0.1; // スケール調整
           x = r * 16 * Math.pow(Math.sin(angle), 3);
           y = -r * (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
-          // 波のエッセンスを加える
+          // 波のエッセンスを加える(円軌道の平行移動)
           x += Math.sin(t) * currentParams.waveHeight * 0.1;
           y += Math.cos(t) * currentParams.waveHeight * 0.1;
           break;
@@ -136,13 +136,14 @@ export const GeometricCanvas = () => {
         y = Math.sin(angle) * radius;
       }
 
+      // 最初だけmoveTo、あとはlineTo
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
 
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
+    ctx.closePath(); // 最後の点と最初の点を自動で繋ぐ
+    ctx.stroke(); // 経路を実際に描画
+    ctx.restore(); // ctx.save()で保存した状態に戻す
   };
 
   // ============================================
