@@ -2,10 +2,11 @@ import { GeometricCanvas } from './components/GeometricCanvas';
 
 function App() {
   return (
-    <div style={{ color: 'white', padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1 style={{ pointerEvents: 'none' }}>Artora</h1>
-      <p style={{ pointerEvents: 'none' }}>by ToraMutton</p>
-
+    <div>
+      <div className="fixed top-0 left-0 right-0 z-10 px-6 py-3 flex justify-between items-center pointer-events-none">
+        <h1 className="text-2xl font-bold tracking-widest text-white">Artora</h1>
+        <p className="text-sm text-gray-400">by ToraMutton</p>
+      </div>
       <GeometricCanvas />
     </div>
   );
