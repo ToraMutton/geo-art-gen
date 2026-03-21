@@ -104,7 +104,7 @@ export const GeometricCanvas = () => {
         case 'Butterfly': // 蝶の羽模様
           radius = currentParams.baseRadius * ( // Roseと同じく完全上書き
             Math.pow(Math.E, Math.cos(angle)) // 自然体数の底 e の-1~1乗(0.37 ~ 2.71)
-            - 2 * Math.cos(4 * angle)
+            - 2 * Math.cos(currentParams.waves * angle)
             + Math.pow(Math.sin(angle / 12), 5)
           ) * 0.3;
           break;
