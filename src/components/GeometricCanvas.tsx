@@ -248,7 +248,14 @@ export const GeometricCanvas = () => {
     <>
       <canvas
         ref={canvasRef}
-        style={{ display: 'block', position: 'fixed', top: 0, left: 0, zIndex: -1 }}
+        style={{
+          display: 'block',
+          position: 'fixed',
+          top: 'calc(50% - 60px)',  // 60px上にずらす
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: -1
+        }}
       />
 
       {/* UIパネル */}
