@@ -67,10 +67,6 @@ export const GeometricCanvas = () => {
   }, [params])
   const canvasSizeRef = useRef({ w: window.innerWidth, h: window.innerHeight });
 
-  useEffect(() => {
-    paramsRef.current = params; // paramsが変わるたびに更新
-  }, [params]);
-
   // 描画ロジック（画面用とダウンロード用で使い回すため分離）
   const drawPath = (ctx: CanvasRenderingContext2D, w: number, h: number, currentParams: Params, time: number) => {
     ctx.fillStyle = `rgba(${hexToRgb(currentParams.bgColor)}, ${currentParams.fadeOpacity})`; // 残像効果
@@ -215,7 +211,7 @@ export const GeometricCanvas = () => {
         canvasSizeRef.current = { w: canvasW, h: canvasH };
 
         // 背景を黒く塗る
-        ctx.fillStyle = '#1a1a1a';
+        ctx.fillStyle = paramsRef.current.bgColor;
         ctx.fillRect(0, 0, canvasW, canvasH);
       };
       resizeCanvasRef.current = resizeCanvas;
@@ -249,6 +245,7 @@ export const GeometricCanvas = () => {
       'Polygon', 'Butterfly', 'Lissajous', 'Web', 'Heart'];
     setParams(prev => ({
       ...prev,  // resolution はそのまま
+      strokeColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`,
       mode: modes[Math.floor(Math.random() * modes.length)],
       points: Math.floor(Math.random() * 1990) + 10,
       waves: Math.floor(Math.random() * 49) + 1,
@@ -271,7 +268,7 @@ export const GeometricCanvas = () => {
     if (!oCtx) return;
 
     // ベースの背景色を塗る
-    oCtx.fillStyle = '#1a1a1a';
+    oCtx.fillStyle = params.bgColor;
     oCtx.fillRect(0, 0, w, h);
 
     // 残像（軌跡）を再現するために、過去60フレーム分を高速でシミュレーション描画する
@@ -327,6 +324,28 @@ export const GeometricCanvas = () => {
           >
             {isPanelOpen ? '▼' : '▲'}
           </button>
+
+          {/* 背景色 */}
+          <div>
+            <label className="block mb-1 text-gray-400">背景色</label>
+            <input
+              type="color"
+              value={params.bgColor}
+              onChange={(e) => updateParam('bgColor', e.target.value)}
+              className="w-10 h-8 rounded cursor-pointer bg-transparent border border-[#3d3d3d]"
+            />
+          </div>
+
+          {/* 線の色 */}
+          <div>
+            <label className="block mb-1 text-gray-400">線の色</label>
+            <input
+              type="color"
+              value={params.strokeColor}
+              onChange={(e) => updateParam('strokeColor', e.target.value)}
+              className="w-10 h-8 rounded cursor-pointer bg-transparent border border-[#3d3d3d]"
+            />
+          </div>
           {/* アルゴリズム */}
           <div className="flex-1">
             <label className="block mb-1 text-gray-400">アルゴリズム</label>
