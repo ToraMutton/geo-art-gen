@@ -41,6 +41,7 @@ export const GeometricCanvas = () => {
   });
 
   const paramsRef = useRef(params); // 
+  const canvasSizeRef = useRef({ w: window.innerWidth, h: window.innerHeight });
 
   useEffect(() => {
     paramsRef.current = params; // paramsが変わるたびに更新
@@ -159,17 +160,36 @@ export const GeometricCanvas = () => {
       let animationFrameId: number;
 
       const resizeCanvas = () => {
+        // まずウィンドウサイズを取得
         const { innerWidth, innerHeight } = window;
-        const dpr = window.devicePixelRatio || 1; // Retinaディスプレイ対応
-        canvas.style.width = `${innerWidth}px`;
-        canvas.style.height = `${innerHeight}px`;
-        canvas.width = innerWidth * dpr;
-        canvas.height = innerHeight * dpr;
+        const dpr = window.devicePixelRatio || 1;
+
+        // アスペクト比を計算
+        const { w: resW, h: resH } = RESOLUTIONS[paramsRef.current.resolution];
+        const aspectRatio = resW / resH;
+
+        // ウィンドウに収まる最大サイズを計算
+        let canvasW = innerWidth;
+        let canvasH = innerWidth / aspectRatio;
+
+        if (canvasH > innerHeight) {
+          canvasH = innerHeight;
+          canvasW = innerHeight * aspectRatio;
+        }
+
+        // キャンバスのサイズを設定
+        canvas.style.width = `${canvasW}px`;
+        canvas.style.height = `${canvasH}px`;
+        canvas.width = canvasW * dpr;
+        canvas.height = canvasH * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // リサイズ時に背景を一度黒く塗りつぶす
+        // refに保存（renderから読むため）
+        canvasSizeRef.current = { w: canvasW, h: canvasH };
+
+        // 背景を黒く塗る
         ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        ctx.fillRect(0, 0, canvasW, canvasH);
       };
 
       // リサイズ時に呼ぶ
@@ -178,7 +198,7 @@ export const GeometricCanvas = () => {
 
       const render = () => {
         timeRef.current += 0.01;
-        drawPath(ctx, window.innerWidth, window.innerHeight, paramsRef.current, timeRef.current);
+        drawPath(ctx, canvasSizeRef.current.w, canvasSizeRef.current.h, paramsRef.current, timeRef.current);
         animationFrameId = requestAnimationFrame(render);
       };
 
@@ -286,7 +306,7 @@ export const GeometricCanvas = () => {
             onClick={handleDownload}
             className="px-8 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors whitespace-nowrap"
           >
-            高画質で保存
+            画像を保存
           </button>
         </div>
       </div>
