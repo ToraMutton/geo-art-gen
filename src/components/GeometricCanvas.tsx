@@ -12,6 +12,8 @@ type Params = {
   waveSpeed: number;
   fadeOpacity: number;
   resolution: keyof typeof RESOLUTIONS;
+  bgColor: string;
+  strokeColor: string;
 };
 
 // 解像度の定義
@@ -45,6 +47,8 @@ export const GeometricCanvas = () => {
     waveSpeed: -6.6,
     fadeOpacity: 0.22,
     resolution: 'FHD (1080p)',
+    bgColor: '#1a1a1a',
+    strokeColor: '#00aaff',
   });
 
   const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -62,7 +66,7 @@ export const GeometricCanvas = () => {
 
   // 描画ロジック（画面用とダウンロード用で使い回すため分離）
   const drawPath = (ctx: CanvasRenderingContext2D, w: number, h: number, currentParams: Params, time: number) => {
-    ctx.fillStyle = `rgba(26, 26, 26, ${currentParams.fadeOpacity})`; // 残像効果
+    ctx.fillStyle = `rgba(${hexToRgb(currentParams.bgColor)}, ${currentParams.fadeOpacity})`; // 残像効果
     ctx.fillRect(0, 0, w, h); // キャンバス全体を指定色で塗りつぶす
 
     ctx.save(); // 現在の状態を保存
@@ -71,7 +75,7 @@ export const GeometricCanvas = () => {
 
     ctx.beginPath(); // 新しいパスを開始
     // 色も時間経過で変わるように
-    ctx.strokeStyle = `hsl(${(time * 50) % 360}, 70%, 60%)`; // 色相変化、彩度と明度は固定
+    ctx.strokeStyle = currentParams.strokeColor;
     ctx.lineWidth = 2; // 線の太さ
 
     // iを0からpoints(頂点数)まで1ずつ増やす
@@ -233,6 +237,22 @@ export const GeometricCanvas = () => {
     setParams(prev => ({ ...prev, [key]: value }))
   }
 
+  const randomize = () => {
+    const modes = ['Wave', 'Chaos', 'Star', 'Rose', 'Spirograph',
+      'Polygon', 'Butterfly', 'Lissajous', 'Web', 'Heart'];
+    setParams(prev => ({
+      ...prev,  // resolution はそのまま
+      mode: modes[Math.floor(Math.random() * modes.length)],
+      points: Math.floor(Math.random() * 1990) + 10,
+      waves: Math.floor(Math.random() * 49) + 1,
+      waveHeight: Math.floor(Math.random() * 500),
+      baseRadius: Math.floor(Math.random() * 490) + 10,
+      rotationSpeed: parseFloat(((Math.random() * 4) - 2).toFixed(1)),
+      waveSpeed: parseFloat(((Math.random() * 20) - 10).toFixed(1)),
+      fadeOpacity: parseFloat((Math.random() * 0.49 + 0.01).toFixed(2)),
+    }));
+  };
+
   const handleDownload = () => {
     const { w, h } = RESOLUTIONS[params.resolution];
 
@@ -334,7 +354,15 @@ export const GeometricCanvas = () => {
             </select>
           </div>
 
-          {/* ボタン */}
+          {/* ランダムボタン */}
+          <button
+            onClick={randomize}
+            className="px-8 py-2 border border-[#444444] hover:border-[#00b259] hover:text-[#00b259] text-gray-400 font-bold rounded transition-colors whitespace-nowrap"
+          >
+            ランダム
+          </button>
+
+          {/* 画像を保存ボタン */}
           <button
             onClick={handleDownload}
             className="px-8 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors whitespace-nowrap"
