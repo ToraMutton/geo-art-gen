@@ -165,7 +165,7 @@ export const GeometricCanvas = () => {
         canvas.style.height = `${innerHeight}px`;
         canvas.width = innerWidth * dpr;
         canvas.height = innerHeight * dpr;
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         // リサイズ時に背景を一度黒く塗りつぶす
         ctx.fillStyle = '#1a1a1a';
