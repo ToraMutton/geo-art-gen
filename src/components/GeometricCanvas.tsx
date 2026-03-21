@@ -172,9 +172,9 @@ export const GeometricCanvas = () => {
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
       };
 
-
+      // リサイズ時に呼ぶ
       window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+      resizeCanvas(); // 初回用呼び出し
 
       const render = () => {
         timeRef.current += 0.01;
@@ -192,9 +192,9 @@ export const GeometricCanvas = () => {
     // 配列部分
     []);
 
-  const updateParam = (key: keyof Params, value: any) => {
-    setParams(prev => ({ ...prev, [key]: value }));
-  };
+  const updateParam = (key: keyof Params, value: Params[keyof Params]) => {
+    setParams(prev => ({ ...prev, [key]: value }))
+  }
 
   const handleDownload = () => {
     const { w, h } = RESOLUTIONS[params.resolution];
