@@ -47,6 +47,8 @@ export const GeometricCanvas = () => {
     resolution: 'FHD (1080p)',
   });
 
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+
   const paramsRef = useRef(params); // 
   useEffect(() => {
     paramsRef.current = params
@@ -276,18 +278,28 @@ export const GeometricCanvas = () => {
       {/* UIパネル */}
       <div className="fixed bottom-0 left-0 right-0 z-10 px-6 py-3 bg-[#111111]/80 font-sans text-sm">
 
+
         {/* スライダー7列 */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 mb-3">
-          <Slider label="頂点数" value={params.points} min={10} max={2000} step={1} onChange={(v) => updateParam('points', v)} />
-          <Slider label="波の数 / 頂点係数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
-          <Slider label="振幅 / 歪み" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
-          <Slider label="基本半径" value={params.baseRadius} min={10} max={1500} step={1} onChange={(v) => updateParam('baseRadius', v)} />
-          <Slider label="回転速度" value={params.rotationSpeed} min={-2} max={2} step={0.1} onChange={(v) => updateParam('rotationSpeed', v)} />
-          <Slider label="時間変化速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
-          <Slider label="残像の濃さ" value={params.fadeOpacity} min={0.01} max={0.5} step={0.01} onChange={(v) => updateParam('fadeOpacity', v)} />
-        </div>
+        {isPanelOpen && (
+          < div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 mb-3">
+            <Slider label="頂点数" value={params.points} min={10} max={2000} step={1} onChange={(v) => updateParam('points', v)} />
+            <Slider label="波の数 / 頂点係数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
+            <Slider label="振幅 / 歪み" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
+            <Slider label="基本半径" value={params.baseRadius} min={10} max={1500} step={1} onChange={(v) => updateParam('baseRadius', v)} />
+            <Slider label="回転速度" value={params.rotationSpeed} min={-2} max={2} step={0.1} onChange={(v) => updateParam('rotationSpeed', v)} />
+            <Slider label="時間変化速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
+            <Slider label="残像の濃さ" value={params.fadeOpacity} min={0.01} max={0.5} step={0.01} onChange={(v) => updateParam('fadeOpacity', v)} />
+          </div>
+        )}
 
         <div className="flex gap-4 items-end">
+          {/* スマホ用開閉ボタン */}
+          <button
+            onClick={() => setIsPanelOpen(prev => !prev)}
+            className="px-3 py-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-gray-400 rounded transition-colors lg:hidden"
+          >
+            {isPanelOpen ? '▼' : '▲'}
+          </button>
           {/* アルゴリズム */}
           <div className="flex-1">
             <label className="block mb-1 text-gray-400">アルゴリズム</label>
@@ -330,7 +342,7 @@ export const GeometricCanvas = () => {
             画像を保存
           </button>
         </div>
-      </div>
+      </div >
     </>
   );
 };
