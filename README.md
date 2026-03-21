@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# Artora
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+幾何学アートジェネレーター。10種類のアルゴリズムとパラメータをリアルタイムで操作して、オリジナルの壁紙を生成・保存できます。
 
-Currently, two official plugins are available:
+<img width="1292" height="1189" alt="image" src="https://github.com/user-attachments/assets/492ceb02-8de7-4a4b-b7c7-f97fad67ff02" />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<img width="1292" height="1194" alt="image" src="https://github.com/user-attachments/assets/87eaa501-3dfb-4a8e-8266-f082dc459b84" />
 
-## React Compiler
+## 🔗 URL
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+https://artoram.toramutton.me
 
-## Expanding the ESLint configuration
+## ✨ 機能
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 10種類の描画アルゴリズム（Wave, Chaos, Rose, Lissajous など）
+- パラメータのリアルタイム調整
+- 背景色・線の色のカスタマイズ
+- ランダム生成
+- FHD / WQHD / 4K / 正方形 / スマホ向け の高画質ダウンロード
+- URLで設定を共有
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠 使用技術
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- React 19 + TypeScript
+- Vite 8
+- Tailwind CSS v4
+- Canvas API
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 ローカルで動かすには
+```bash
+git clone https://github.com/ToraMutton/artoram.git
+cd artoram
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 😼もっとやさしく
+たのしく、じゆうにちょさくけんフリーのかべがみがつくれます！
