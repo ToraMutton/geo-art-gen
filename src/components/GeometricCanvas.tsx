@@ -1,4 +1,4 @@
-// src/components/GeometricCanvas.tsx
+// src/components/geometriccanvas.tsx
 import { useRef, useEffect, useState } from 'react';
 
 // パラメータの型定義
@@ -231,57 +231,64 @@ export const GeometricCanvas = () => {
         style={{ display: 'block', position: 'fixed', top: 0, left: 0, zIndex: -1 }}
       />
 
-      {/* Modrinth風UIパネル */}
-      <div className="fixed top-4 right-4 z-10 w-80 p-5 bg-[#1e1e1e] border border-[#2d2d2d] rounded shadow-2xl font-sans text-sm h-max max-h-[90vh] overflow-y-auto custom-scrollbar">
+      {/* UIパネル */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 p-4 bg-[#1e1e1e] border border-[#2d2d2d] rounded shadow-2xl font-sans text-sm h-max max-h-[90vh] overflow-y-auto custom-scrollbar">
         <h2 className="mb-4 text-lg font-bold text-gray-200">Geometry Settings</h2>
 
-        <div className="mb-4">
-          <label className="block mb-1 text-gray-400">アルゴリズム (10種)</label>
-          <select
-            value={params.mode}
-            onChange={(e) => updateParam('mode', e.target.value)}
-            className="w-full bg-[#2d2d2d] border border-[#3d3d3d] text-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#00b259]"
-          >
-            <option value="Wave">Wave (サイン波)</option>
-            <option value="Chaos">Chaos (タンジェント)</option>
-            <option value="Star">Star (星型)</option>
-            <option value="Rose">Rose (バラ曲線)</option>
-            <option value="Spirograph">Spirograph (トロコイド風)</option>
-            <option value="Polygon">Polygon (多角形)</option>
-            <option value="Butterfly">Butterfly (蝶の羽)</option>
-            <option value="Lissajous">Lissajous (リサジュー)</option>
-            <option value="Web">Web (クモの巣)</option>
-            <option value="Heart">Heart (ハート型)</option>
-          </select>
+        {/* スライダー7列 */}
+        <div className="grid grid-cols-7 gap-4">
+          <Slider label="頂点数" value={params.points} min={10} max={2000} step={1} onChange={(v) => updateParam('points', v)} />
+          <Slider label="波の数 / 頂点係数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
+          <Slider label="振幅 / 歪み" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
+          <Slider label="基本半径" value={params.baseRadius} min={10} max={1500} step={1} onChange={(v) => updateParam('baseRadius', v)} />
+          <Slider label="回転速度" value={params.rotationSpeed} min={-2} max={2} step={0.1} onChange={(v) => updateParam('rotationSpeed', v)} />
+          <Slider label="時間変化速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
+          <Slider label="残像の濃さ" value={params.fadeOpacity} min={0.01} max={0.5} step={0.01} onChange={(v) => updateParam('fadeOpacity', v)} />
         </div>
 
-        <Slider label="頂点数" value={params.points} min={10} max={2000} step={1} onChange={(v) => updateParam('points', v)} />
-        <Slider label="波の数 / 頂点係数" value={params.waves} min={1} max={50} step={1} onChange={(v) => updateParam('waves', v)} />
-        <Slider label="振幅 / 歪み" value={params.waveHeight} min={0} max={500} step={1} onChange={(v) => updateParam('waveHeight', v)} />
-        <Slider label="基本半径" value={params.baseRadius} min={10} max={1500} step={1} onChange={(v) => updateParam('baseRadius', v)} />
-        <Slider label="回転速度" value={params.rotationSpeed} min={-2} max={2} step={0.1} onChange={(v) => updateParam('rotationSpeed', v)} />
-        <Slider label="時間変化速度" value={params.waveSpeed} min={-10} max={10} step={0.1} onChange={(v) => updateParam('waveSpeed', v)} />
-        <Slider label="残像の濃さ" value={params.fadeOpacity} min={0.01} max={0.5} step={0.01} onChange={(v) => updateParam('fadeOpacity', v)} />
+        <div className="flex gap-4 items-end">
+          {/* アルゴリズム */}
+          <div className="flex-1">
+            <label className="block mb-1 text-gray-400">アルゴリズム (10種)</label>
+            <select
+              value={params.mode}
+              onChange={(e) => updateParam('mode', e.target.value)}
+              className="w-full bg-[#2d2d2d] border border-[#3d3d3d] text-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#00b259]"
+            >
+              <option value="Wave">Wave (サイン波)</option>
+              <option value="Chaos">Chaos (タンジェント)</option>
+              <option value="Star">Star (星型)</option>
+              <option value="Rose">Rose (バラ曲線)</option>
+              <option value="Spirograph">Spirograph (トロコイド風)</option>
+              <option value="Polygon">Polygon (多角形)</option>
+              <option value="Butterfly">Butterfly (蝶の羽)</option>
+              <option value="Lissajous">Lissajous (リサジュー)</option>
+              <option value="Web">Web (クモの巣)</option>
+              <option value="Heart">Heart (ハート型)</option>
+            </select>
+          </div>
+          {/* 出力サイズ */}
+          <div className="flex-1">
+            <label className="block mb-1 text-gray-400">出力サイズ</label>
+            <select
+              value={params.resolution}
+              onChange={(e) => updateParam('resolution', e.target.value)}
+              className="w-full bg-[#2d2d2d] border border-[#3d3d3d] text-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#00b259]"
+            >
+              {Object.keys(RESOLUTIONS).map(res => (
+                <option key={res} value={res}>{res}</option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mt-6 mb-2 border-t border-[#3d3d3d] pt-4">
-          <label className="block mb-1 text-gray-400">出力サイズ</label>
-          <select
-            value={params.resolution}
-            onChange={(e) => updateParam('resolution', e.target.value)}
-            className="w-full bg-[#2d2d2d] border border-[#3d3d3d] text-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-[#00b259]"
+          {/* ボタン */}
+          <button
+            onClick={handleDownload}
+            className="px-8 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors whitespace-nowrap"
           >
-            {Object.keys(RESOLUTIONS).map(res => (
-              <option key={res} value={res}>{res}</option>
-            ))}
-          </select>
+            高画質で保存
+          </button>
         </div>
-
-        <button
-          onClick={handleDownload}
-          className="w-full mt-2 px-4 py-2 bg-[#00b259] hover:bg-[#00994d] text-white font-bold rounded transition-colors"
-        >
-          高画質で保存
-        </button>
       </div>
     </>
   );
