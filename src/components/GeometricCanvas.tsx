@@ -31,6 +31,7 @@ const RESOLUTIONS = {
 
 export const GeometricCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resizeCanvasRef = useRef<() => void>(() => { });
   const timeRef = useRef(0); // アニメーションの時間を保持
 
   // 初期状態
@@ -47,6 +48,10 @@ export const GeometricCanvas = () => {
   });
 
   const paramsRef = useRef(params); // 
+  useEffect(() => {
+    paramsRef.current = params
+    resizeCanvasRef.current()
+  }, [params])
   const canvasSizeRef = useRef({ w: window.innerWidth, h: window.innerHeight });
 
   useEffect(() => {
@@ -175,12 +180,15 @@ export const GeometricCanvas = () => {
         const aspectRatio = resW / resH;
 
         // ウィンドウに収まる最大サイズを計算
+        const panelHeight = 100  // パネルの高さの概算
+        const availableH = innerHeight - panelHeight
+
         let canvasW = innerWidth;
         let canvasH = innerWidth / aspectRatio;
 
-        if (canvasH > innerHeight) {
-          canvasH = innerHeight;
-          canvasW = innerHeight * aspectRatio;
+        if (canvasH > availableH) {
+          canvasH = availableH;
+          canvasW = availableH * aspectRatio;
         }
 
         // キャンバスのサイズを設定
@@ -197,6 +205,7 @@ export const GeometricCanvas = () => {
         ctx.fillStyle = '#1a1a1a';
         ctx.fillRect(0, 0, canvasW, canvasH);
       };
+      resizeCanvasRef.current = resizeCanvas;
 
       // リサイズ時に呼ぶ
       window.addEventListener('resize', resizeCanvas);
